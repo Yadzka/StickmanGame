@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+canvas {
+    border:1px solid #d3d3d3;
+    background-color: #f1f1f1;
+}
+</style>
+</head>
+<body onload="startGame()">
+<script>
+
+var myGamePiece;
+var myBackground;
+
+function startGame() {
+    myGamePiece = new component(40, 60, "bob1.png", 10, 190, "image");
+    myBackground = new component(656, 270, "InsideGame.png", 0, 0, "background");
+    myGameArea.start();
+}
+
+var myGameArea = {
+    canvas : document.createElement("canvas"),
+    start : function() {
+        this.canvas.width = 480;
+        this.canvas.height = 270;
+        this.context = this.canvas.getContext("2d");
+        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        this.frameNo = 0;
+        this.interval = setInterval(updateGameArea, 20);
+        window.addEventListener('keydown', function (e) {
+      myGameArea.keys = (myGameArea.keys || []);
+      myGameArea.keys[e.keyCode] = true;
+    })
+    window.addEventListener('keyup', function (e) {
+      myGameArea.keys[e.keyCode] = false;
+    })
+        },
+    clear : function() {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    },
+    stop : function() {
+        clearInterval(this.interval);
+    }
+}
+
+function component(width, height, color, x, y, type) {
+    this.type = type;
+    if (type == "image" || type == "background") {
+        this.image = new Image();
+        this.image.src = color;
+    }
+    this.width = width;
+    this.height = height;
+    this.speedX = 0;
+    this.speedY = 0;    
+    this.x = x;
+    this.y = y;   
+    this.gravity = 0.05;
+  this.gravitySpeed = 0; 
+    this.update = function() {
+        ctx = myGameArea.context;
+        if (type == "image" || type == "background") {
+            ctx.drawImage(this.image, 
+                this.x, 
+                this.y,
+                this.width, this.height);
+        if (type == "background") {
+            ctx.drawImage(this.image, 
+                this.x + this.width, 
+                this.y,
+                this.width, this.height);
+        }
+        } else {
+            ctx.fillStyle = color;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
+    }
+    this.newPos = function() {
+        this.gravitySpeed += this.gravity;
+        this.x += this.speedX;
+        this.y += this.speedY + this.gravitySpeed;
+        if (this.type == "background") {
+            if (this.x == -(this.width)) {
+                this.x = 0;
+            }
+        }
+        this.hitBottom();
+    }
+
+    this.hitBottom = function() {
+    var rockbottom = myGameArea.canvas.height - this.height;
+    if (this.y > rockbottom) {
+      this.y = rockbottom;
+    }
+  }
+    function stopMove(event) {
+  const keyPressed = event.keyCode;
+  if (keyPressed == left) {
+    karakter.objX = 0;
+  } else if (keyPressed == right) {
+    karakter.objX = 0;
+  } else if (keyPressed == up) {
+    karakter.objY = 0;
+  } else if (keyPressed == down) {
+    karakter.objY = 5;
+  }
+}    
+}
+
+function updateGameArea() {
+    myGameArea.clear();
+    myBackground.speedX = -1;
+    myGamePiece.speedX = 0;
+  myGamePiece.speedY = 0;
+  if (myGameArea.keys && myGameArea.keys[37]) {myGamePiece.speedX = -1; }
+  if (myGameArea.keys && myGameArea.keys[39]) {myGamePiece.speedX = 1; }
+  if (myGameArea.keys && myGameArea.keys[38]) {myGamePiece.speedY = -1; }
+  if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speedY = 1; }
+    myBackground.newPos();    
+    myBackground.update();
+    myGamePiece.newPos();    
+    myGamePiece.update();
+}
+
+function move(dir) {
+    myGamePiece.image.src = "bob1.png";
+    if (dir == "up") {myGamePiece.speedY = -1; }
+    if (dir == "down") {myGamePiece.speedY = 1; }
+    if (dir == "left") {myGamePiece.speedX = -1; }
+    if (dir == "right") {myGamePiece.speedX = 1; }
+}
+</script>
+</body>
+</html>
